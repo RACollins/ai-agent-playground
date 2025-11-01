@@ -3,6 +3,7 @@ import os
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
+from pydantic_ai.messages import ModelRequest, ModelResponse, UserPromptPart, TextPart
 
 load_dotenv()  # Ensures .env variables are loaded
 api_key = os.getenv("BASIC_AGENT_API_KEY")
@@ -14,14 +15,35 @@ agent = Agent[None, str](model=model, system_prompt="You are a helpful assistant
 
 def main():
     print("Type 'quit' to exit.")
+
+    # Initialize message_history as an empty list
+    message_history = []
+
     user_message = input("> ")
-    result = agent.run_sync(user_message)
+
     while user_message.lower() != "quit":
+        # Run with conversation history
+        result = agent.run_sync(user_message, message_history=message_history)
+
         print(result.output)
+
+        # Add the user message and response to message_history (only text content, no metadata)
+        message_history.append(
+            ModelRequest(parts=[UserPromptPart(content=user_message)])
+        )
+        message_history.append(ModelResponse(parts=[TextPart(content=result.output)]))
+
+        # Keep only the last 10 messages (5 user-response pairs)
+        if len(message_history) > 10:
+            message_history = message_history[-10:]
+
+        print("================================================")
+        print(
+            f"Message history contains {len(message_history)} messages ({len(message_history)//2} pairs)"
+        )
+        print("================================================")
+
         user_message = input("> ")
-        if user_message.lower() != "quit":
-            # Run with conversation history
-            result = agent.run_sync(user_message, message_history=result.all_messages())
 
 
 if __name__ == "__main__":
