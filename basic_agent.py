@@ -12,9 +12,11 @@ provider = OpenAIProvider(api_key=api_key)
 model = OpenAIChatModel("gpt-4o-mini", provider=provider)
 agent = Agent[None, str](model=model, system_prompt="You are a helpful assistant.")
 
+
 @agent.tool_plain
 def get_weather_forecast(city: str) -> str:
     return f"The weather in {city} is sunny."
+
 
 def main():
     print("Type 'quit' to exit.")
@@ -39,8 +41,6 @@ def main():
         # Keep only the last 10 messages (5 user-response pairs)
         if len(message_history) > 10:
             message_history = message_history[-10:]
-            
-        
 
         user_message = input("> ")
 
