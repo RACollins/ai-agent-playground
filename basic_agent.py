@@ -37,11 +37,15 @@ def main():
         if len(message_history) > 10:
             message_history = message_history[-10:]
 
-        print("================================================")
+        """ print("================================================")
         print(
             f"Message history contains {len(message_history)} messages ({len(message_history)//2} pairs)"
         )
         print("================================================")
+        for message in message_history:
+            print(message)
+            print("------------------------------------------------")
+        print("================================================") """
 
         user_message = input("> ")
 
