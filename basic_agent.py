@@ -4,6 +4,8 @@ from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_ai.messages import ModelRequest, ModelResponse, UserPromptPart, TextPart
+import openmeteo_requests
+import pprint
 
 load_dotenv()  # Ensures .env variables are loaded
 api_key = os.getenv("BASIC_AGENT_API_KEY")
@@ -14,8 +16,19 @@ agent = Agent[None, str](model=model, system_prompt="You are a helpful assistant
 
 
 @agent.tool_plain
-def get_weather_forecast(city: str) -> str:
-    return f"The weather in {city} is sunny."
+def get_weather_forecast(latitude: float, longitude: float) -> str:
+    url = "https://api.open-meteo.com/v1/forecast"
+    openmeteo = openmeteo_requests.Client()
+    params = {
+        "latitude": latitude,
+        "longitude": longitude,
+        "current": ["temperature_2m"],
+    }
+    responses = openmeteo.weather_api(url, params=params)
+    response = responses[0]
+    current = response.Current()
+    current_temperature_2m = current.Variables(0).Value()
+    return current_temperature_2m
 
 
 def main():
@@ -31,6 +44,9 @@ def main():
         result = agent.run_sync(user_message, message_history=message_history)
 
         print(result.output)
+        """ print("--------------------------------")
+        print(result.all_messages())
+        print("--------------------------------") """
 
         # Add the user message and response to message_history (only text content, no metadata)
         message_history.append(
