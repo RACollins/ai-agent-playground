@@ -1,12 +1,13 @@
-from dotenv import load_dotenv
 import os
+
+import openmeteo_requests
+from dotenv import load_dotenv
+from mem0 import Memory
 from pydantic_ai import Agent
+from pydantic_ai.messages import ModelRequest, ModelResponse, TextPart, UserPromptPart
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
-from pydantic_ai.messages import ModelRequest, ModelResponse, UserPromptPart, TextPart
-import openmeteo_requests
-import pprint
-from mem0 import Memory
+
 
 load_dotenv()  # Ensures .env variables are loaded
 api_key = os.getenv("BASIC_AGENT_API_KEY")
