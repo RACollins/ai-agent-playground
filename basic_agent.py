@@ -7,6 +7,14 @@ from pydantic_ai import Agent
 from pydantic_ai.messages import ModelRequest, ModelResponse, TextPart, UserPromptPart
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
+from pydantic import BaseModel
+
+
+class WeatherReport(BaseModel):
+    temp: float
+    report: str
+    lat: float
+    lon: float
 
 
 load_dotenv()  # Ensures .env variables are loaded
@@ -20,7 +28,15 @@ memory = Memory()
 
 provider = OpenAIProvider(api_key=api_key)
 model = OpenAIChatModel("gpt-4o-mini", provider=provider)
-agent = Agent[None, str](model=model, system_prompt="You are a helpful assistant.")
+agent = Agent[None, WeatherReport | str](
+    model=model,
+    output_type=[WeatherReport, str],
+    system_prompt="""
+    You are an expert weather forecaster. 
+    You give detailed weather reports, focusing on the temperature at 2m elevation. 
+    If the user does not provide enough detail, or asks about other weather parameters, please ask for more information.
+    """,
+)
 
 
 @agent.tool_plain
